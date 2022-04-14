@@ -70,7 +70,7 @@
 
     <h1 style="color:Fuchsia;font-size:2.0em;text-align:center;padding:10px;margin:4vh 0 0 0;">Login</h1>
 
-    <form id="form1" onsubmit="check_form();">
+    <form id="form1" onsubmit="submitcall(event);">
 
 
         <input type="text" name="username" id="name" placeholder="Username..." autocomplete="off">
@@ -88,9 +88,8 @@
         }
 
 
-        async function check_form() {
+        async function submitcall(event) {
             event.preventDefault();
-            // let data = ""
             let username = "";
             let password = "";
             let data = await getData();
@@ -101,15 +100,14 @@
             let pass = document.getElementById("pass").value;
 
             if (name == username && pass == password) {
-                alert("SuccessFully Logged In");
-                window.open('https://vtop.vit.ac.in/vtop/initialProcess');
+                window.alert("Please enter the correct password:");
                 document.getElementById("name").value = "";
                 document.getElementById("pass").value = "";
             }
             else {
                 if (login_attempts == 0) {
-                    fetch("/submit")
-                    alert("No Login Attempts Available");
+                    fetch("/submit");
+                    window.alert("No Login Attempts Available");
                     // window.open('index1.html');
                     setInterval(function () {
                         document.getElementById("clickButton").click();
@@ -119,9 +117,7 @@
                 }
                 else {
                     login_attempts = login_attempts - 1;
-                    alert("Login Failed Now Only " + login_attempts + " Login Attempts Available");
                     if (login_attempts == 0) {
-                        console.log("Hello hello");
                         fetch("/submit")
                         document.getElementById("name").disabled = true;
                         document.getElementById("pass").disabled = true;

@@ -6,15 +6,16 @@ import socket
 import sys
 import traceback
 import paramiko
+import subprocess
 
 LOG = open("logs/log.txt", "a")
 HOST_KEY = paramiko.RSAKey(filename='keys/private.key')
 SSH_BANNER = "SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.3"
 
 
-def handle_cmd(cmd, chan):
+def handle_cmd(command, chan):
     """Branching statements to handle and prepare a response for a command"""
-    response = ""
+    '''response = ""
     if cmd.startswith("sudo"):
         send_ascii("sudo.txt", chan)
         return
@@ -45,22 +46,32 @@ def handle_cmd(cmd, chan):
         return
     else:
         send_ascii("clippy.txt", chan)
-        response = "Use the 'help' command to view available commands"
-
+        response = "Use the 'help' command to view available commands"'''
+    response = ""
+    if command.startswith("ls"):
+        response = "Desktop   Downloads   text.txt"
+    elif command.startswith("pwd"):
+        response = "/root"
+    elif command.startswith("whoami"):
+        response = "root"
+    elif command == "help":
+        return
+    else:
+        response = command + ": command not found"
+    chan.send(response + "\r\n")
     LOG.write(response + "\n")
     LOG.flush()
-    chan.send(response + "\r\n")
+    #chan.send(response + "\r\n")
 
 
-def send_ascii(filename, chan):
+'''def send_ascii(filename, chan):
     """Print ascii from a file and send it to the channel"""
     with open('ascii/{}'.format(filename)) as text:
         chan.send("\r")
         for line in enumerate(text):
             LOG.write(line[1])
             chan.send(line[1] + "\r")
-    LOG.flush()
-
+    LOG.flush()'''
 
 class FakeSshServer(paramiko.ServerInterface):
     """Settings for paramiko server interface"""
@@ -74,7 +85,10 @@ class FakeSshServer(paramiko.ServerInterface):
 
     def check_auth_password(self, username, password):
         # Accept all passwords as valid by default
-        return paramiko.AUTH_SUCCESSFUL
+        #return paramiko.AUTH_FAILED
+	if (username == 'root') and (password  == 'password123'):
+            return paramiko.AUTH_SUCCESSFUL
+        return paramiko.AUTH_FAILED
 
     def get_allowed_auths(self, username):
         return 'password'
@@ -89,8 +103,11 @@ class FakeSshServer(paramiko.ServerInterface):
 
 def handle_connection(client, addr):
     """Handle a new ssh connection"""
-    LOG.write("\n\nConnection from: " + addr[0] + "\n")
-    print('Got a connection!')
+    #LOG.write("\n\nConnection from: " + addr[0] + "\n")
+    LOG.write(addr[0] +" execution steps: "+ "\n")
+    print(addr[0] +" execution steps: "+ "\n")
+    subprocess.call(['sudo', './sshblock.sh', addr[0]])
+    print('Blocked ip : '+addr[0])
     try:
         transport = paramiko.Transport(client)
         transport.add_server_key(HOST_KEY)
@@ -114,8 +131,11 @@ def handle_connection(client, addr):
             raise Exception("No shell request")
 
         try:
-            chan.send("Welcome to the my control server\r\n\r\n")
-            run = True
+            #chan.send("Welcome to Ubuntu 16.04.7 LTS (GNU/Linux 4.15.0-142-generic i686)\r\n* Documentation:  https://help.ubuntu.com\r\n* Management: https://landscape.canonical.com\r\n * Support: https://ubuntu.com/advantage\n\r\n")
+            chan.send("Welcome to Ubuntu 16.04.7 LTS (GNU/Linux 4.15.0-142-generic i686)\r\n\r\n* Documentation:  https://help.ubuntu.com\r\n* Management: https://landscape.canonical.com\r\n* Support: https://ubuntu.com/advantage\n\r\n")
+            chan.send("UA Infra: Extended Security Maintenance (ESM) is not enabled.\r\n\r\n0 updates can be applied immediately.\r\n\r\n160 additional security updates can be applied with UA Infra: ESM\r\nLearn more about enabling UA Infra: ESM service for Ubuntu 16.04 at\r\nhttps://ubuntu.com/16-04")
+            chan.send("\r\nUbuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by\r\napplicable law.\r\n\r\nLast login: Sun Apr 10 12:45:40 2022 from 10.0.2.5\r\n")  
+	    run = True
             while run:
                 chan.send("$ ")
                 command = ""

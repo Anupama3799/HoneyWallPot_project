@@ -35,24 +35,21 @@ def creds():
     f = open("data.json", "r")
     return jsonify(f.read())
 
-"""@app.route('/screenshot/')
+@app.route('/screenshot/')
 def my_link():
-    cap = cv2.VideoCapture(0)
-        
-    if cap.isOpened():
-        ret, frame = cap.read()
-    else:
-        ret = False
+    user = uuid.uuid4().hex
+    capture = cv2.VideoCapture(0)    
+    if capture.isOpened():
+        frame = capture.read()
 
-    img1 = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-    directory = r"G:/cyberlab/Screenshots"
+    image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    directory = os.getcwd() + "/images"
     os.chdir(directory)
-    print(os.listdir(directory)) 
-    filename = 'Intruder.jpg'
-    cv2.imwrite(filename, img1)"""
+    #print(os.listdir(directory)) 
+    filename = 'Intruder '+user+'.jpg'
+    cv2.imwrite(filename, image)
 
-@app.route('/submit/')
+@app.route('/submit')
 def submit():
     user = uuid.uuid4().hex
     geoip_data = 'https://ipinfo.io/'
@@ -64,21 +61,6 @@ def submit():
     f.write(str(r.text))
     f.write("\n")
     f.close()
-    """cap = cv2.VideoCapture(0)
-        
-    if cap.isOpened():
-        ret, frame = cap.read()
-        print(ret)
-        print(frame)
-    else:
-        ret = False
-
-    img1 = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-    directory = os.getcwd() + "/images"
-    os.chdir(directory)
-    print(os.listdir(directory)) 
-    filename = 'Intruder '+user+'.jpg'
-    cv2.imwrite(filename, img1)"""  
     return render_template('index.html')
-app.run()
+app.run(host='0.0.0.0')
+

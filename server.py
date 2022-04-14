@@ -2,9 +2,9 @@ import os
 from multiprocessing import Process
 
 def webserver():
-    os.system("sudo python webserver.py")     
+    os.system("python3 ./webserver.py")     
 def ssh():
-    os.system("sudo python ssh.py") 
+    os.system("python ./ssh.py") 
 
 if __name__ == '__main__':
     p = Process(target=webserver)
